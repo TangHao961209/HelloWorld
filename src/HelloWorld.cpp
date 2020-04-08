@@ -18,5 +18,6 @@ int main() {
 	demo.years = 20;
 	demo1 *demo2 = &demo;
 	cout << "name: "<< demo2->name <<"\n years: "<<demo2->years<<endl; // prints !!!Hello World!!!
+	cout<<"just for git test"<<endl;
 	return 0;
 }
