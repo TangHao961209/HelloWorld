@@ -3,6 +3,8 @@
 //#include <execinfo.h>  特定于 Linux的
 #include<unistd.h>
 #include<stdlib.h>
+//#include <libunwind.h> 特定于 Linux的
+
 
 using namespace std;
 const int max_length = 5;
@@ -22,8 +24,25 @@ void printok(char *name1){
 	printf("test1 = %s,*test1 = %c,&(*test1) = %x,&test1 = %x \n",test1,*test1,&(*test1),&test1);
 	for(int i = 0;i <= (int)(sizeof(test)/sizeof(test[0]))-1;i++){
 		printf("test[%d] = %c \t",i,test[i]);
+		if(i == (int)(sizeof(test)/sizeof(test[0]))-1 ){
+			cout<<endl;
+		}
 	}
-	//delete[] test; //删除数组空间  什么时候调用？
+	//delete[] test1; //删除数组空间  什么时候调用？
+
+	 //分配动态一维数组
+	    int *arr=new int[max_length];
+	    arr[0] =1;
+	    printf("arr[0] = %d \n",arr[0]);
+/*
+	    for(int i=0;i<max_length;i++)
+	        cin>>arr[i];
+	    for(int i=0;i<max_length;i++)
+	       cout<<arr[i]<<" ";
+*/
+	    //释放arr数组
+	    delete[] arr;
+	    printf("arr[0] = %d \n",arr[0]);
 }
 /*
  * just for linux
@@ -49,5 +68,33 @@ void debugfunction(void)
    for (j = 0; j < nptrs; j++)
        printf("%s\n", strings[j]);
    free(strings);
+}
+#endif
+#ifdef Linux
+// Call this function to get a backtrace.
+void backtrace() {
+  unw_cursor_t cursor;
+  unw_context_t context;
+
+  // Initialize cursor to current frame for local unwinding.
+  unw_getcontext(&context);
+  unw_init_local(&cursor, &context);
+
+  // Unwind frames one by one, going up the frame stack.
+  while (unw_step(&cursor) > 0) {
+    unw_word_t offset, pc;
+    unw_get_reg(&cursor, UNW_REG_IP, &pc);
+    if (pc == 0) {
+      break;
+    }
+    printf("0x%lx:", pc);
+
+    char sym[256];
+    if (unw_get_proc_name(&cursor, sym, sizeof(sym), &offset) == 0) {
+      printf(" (%s+0x%lx)\n", sym, offset);
+    } else {
+      printf(" -- error: unable to obtain symbol name for this frame\n");
+    }
+  }
 }
 #endif
