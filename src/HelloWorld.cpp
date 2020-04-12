@@ -13,7 +13,7 @@
 using namespace std;
 //char name[MAX_NAME_LENGTH];
 void printok(char *name1);
-int main() {
+int main1() {
 	demo1  demo;
 	strncpy(demo.name,"Bob",MAX_NAME_LENGTH);
 	//strncpy(name,"Bob",MAX_NAME_LENGTH);
@@ -25,5 +25,18 @@ int main() {
 
 	char *name1 = "Bob";
 	printok(name1);
+
+#ifdef Resolved
+	SeqList *L;
+	int mSize =10;
+	int index = 5;
+	int Status = 0;
+	ElemType *x;
+	Status = Init(L,mSize);
+	Find(L,index,x);
+	//顺序表的初始化
+#endif 
 	return 0;
 }
+
+
