@@ -20,7 +20,7 @@ void showbits(int var) {
 	puts("");
 }
 
-int main() {
+static int main1() {   //两个main1函数，通过static关键字声明
 	int var = 96;
 	showbits(var);
 	return 0;

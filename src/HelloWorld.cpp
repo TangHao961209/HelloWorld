@@ -9,6 +9,7 @@
 #include <iostream>
 #include "HelloWorld.h"
 #include <string.h>
+#include "Cat_Eat_Rat.h"
 #define LOG_TAG "Hello_World"
 using namespace std;
 //char name[MAX_NAME_LENGTH];
@@ -38,5 +39,36 @@ int main1() {
 #endif 
 	return 0;
 }
+void func_test_eat(Animal *animal){
+    animal->eat();
+    //animal->~Animal(); //析构函数可以自己调用？
+    //animal->Animal();//构造函数可以自己调用
+}
+
+/*
+ * 基类有虚函数就可以不用重写该函数
+ */
+/*
+void func_test_eat(Cat *animal){  //只能重载？可以使用虚函数==>在基类中的方法使用vitural关键字声明
+    animal->eat();
+    animal->~Animal(); //析构函数可以自己调用？
+    //animal->Animal();//构造函数可以自己调用
+}
+*/
+int main2(){
+	Animal *animal1 = new Animal();
+	animal1->eat();
+	func_test_eat(animal1);
+	Cat *cat1 = new Cat();
+	cat1->eat();
+	func_test_eat(cat1);  //应该是调用子类的重写函数
+	delete cat1;//调用父类的析构函数
+	return 0;
+}
 
 
+int main(){
+	main1();
+	main2();
+	return 0;
+}
