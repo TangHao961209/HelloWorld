@@ -3,7 +3,8 @@
 #define Hello_World
 	#ifdef Hello_World
 		typedef struct demo{
-			char name [MAX_NAME_LENGTH];
+			//char name[MAX_NAME_LENGTH];
+			char name[20];
 			int  years;
 		}demo1;
    #endif
