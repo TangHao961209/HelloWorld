@@ -70,5 +70,8 @@ int main2(){
 int main(){
 	main1();
 	main2();
+	for(int i = 0;i < 100;i++){
+		printf("i:%d ÆæÅ¼ĞÔ£º%s \n",i,dbtest(i));
+	}
 	return 0;
 }
