@@ -1,0 +1,57 @@
+Selinux权限问题
+TE文件基本规则：
+rule_name source_type target_type:class perm_set
+rule_name：规则名，分别有allow,dontaudit,neverallow等
+source_type：主要作用是用来填写一个域(domain)     avc报错中的scontext  通过type 定义新域，关联已有的域 
+target_type：类型     avc报错中的tcontext
+class：类别，主要有File,Dir,Socket,SEAndroid还有Binder等       avc报错中的tclass  可以通过ls -l查看文件类型
+perm_set：动作集       读写等操作
+
+type  typeattribute  attribute  /system/sepolicy/public/attributes  所有定义的attributes
+	# All types used for property service
+	# On change, update CHECK_PC_ASSERT_ATTRS
+	# definition in tools/checkfc.c.
+	attribute property_type;
+
+perm_set  在/system/sepolicy/private/access_vectors 有定义一系列的操作 common common_name { permission_name ... }
+/system/sepolicy/private/users    其实是将user与roles进行了关联，设置了user的安全级别，s0为最低级是默认的级别，mls_systemHigh是最高的级别
+user u roles { r } level s0 range s0 - mls_systemhigh;
+
+/system/sepolicy/private/security_classes    指的是上文命令中的class，class的内容是指在android运行过程中，程序或者系统可能用到的操作的模块
+/system/sepolicy/public/te_macros    系统定义的宏全在te_macros文件
+
+camera相关的selinux配置文件
+system/sepolicy/private/cameraserver.te
+	typeattribute cameraserver coredomain;
+	init_daemon_domain(cameraserver)
+	
+系统属性 system/sepolicy/private/property_contexts
+
+Google在Android O以后,为了降低vendor和system之间的耦合度,对property的作用区域也做了明确的区分,分为vendor三方的property和system平台端的property.
+
+
+如何确定是否是selinux权限问题
+setenforce 0关掉selinux权限后   setprop 可以成功set
+setenforce 1开启selinux权限后 无法set
+
+set_prop ？？  set_prop(cameraserver, system_prop) ==> 赋予cameraserver对system_prop的设置权限
+			添加上述代码后,发现编译失败,查看编译失败log,发现其中配置的property要同system/sepolicy / prebuilts/api/28.0/private/ 要相同,不然会导致编译fail,此处对比同步过去即可.
+# set_prop(sourcedomain, targetproperty)
+# Allows source domain to set the
+# targetproperty.
+#
+define(`set_prop', `
+unix_socket_connect($1, property, init)
+allow $1 $2:property_service set;    ==>允许$1对$2的property_service具有set权限
+get_prop($1, $2)
+')			
+			
+get_prop ?? 读取权限
+#####################################
+# get_prop(sourcedomain, targetproperty)
+# Allows source domain to read the
+# targetproperty.
+#
+define(`get_prop', `
+allow $1 $2:file r_file_perms;
+')
