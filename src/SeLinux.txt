@@ -1,3 +1,24 @@
+概念:安全增强型(Security-Ehanced Linux) linux的一个安全子系统
+以用户身份运行进程，系统上的文件和其他资源都设置权限标签    权限标签：控制哪些用户对哪些文件具有哪些访问权
+不同之处：若要访问文件必须具有普通访问权限和selinux访问权限。因此，即使以超级用户身份运行程序，根据进程以及文件或资源的selinux安全性上下文可能拒绝访问文件或资源
+                    普通权限：rwx
+Selinux的三种模式：
+	   1.enforcing：强制模式。违反selinux规则的行为将被阻止并记录到日志中。	
+	   2.permissive：宽容模式。违反 selinux 规则的行为只会记录到日志中，不会阻止。一般为调试用。
+	   3.disabled：关闭selinux。
+修改Selinux模式：
+	获取当前的Selinux模式 getenforce
+	setenforce 1    更改selinux为enforcing
+	setenforce 0 更改selinux为premissive
+vim  /etc/sysconfig/selinux   			##selinux的配置文件中，可以通过修改第7行，进行更改。
+SELinux=enforcing|premissive|disabled
+核心：安全上下文
+	分为进程安全上下文  文件安全上下文，只有两者的安全上下文对应上了，进程才能访问文件
+	它们的对应关系由政策中的规则决定。文件安全上下文由文件创建的位置和创建文件的进程所决定。而且系统有一套默认值，用户也可以对默认值进行设定。需要注意的是，单纯的移动文件操作并不会改变文件的安全上下文。
+安全上下文的构成：
+	安全上下文有四个字段，分别用冒号隔开。形如：system_u:object_r:admin_home_t:s0。分别代表：身份识别、SELinux角色、类型（最重要）、安全级别	
+	一个进程的类型通常被称为域(domain)    	
+	                       
 Selinux权限问题
 TE文件基本规则：
 rule_name source_type target_type:class perm_set
@@ -5,7 +26,9 @@ rule_name：规则名，分别有allow,dontaudit,neverallow等
 source_type：主要作用是用来填写一个域(domain)     avc报错中的scontext  通过type 定义新域，关联已有的域 
 target_type：类型     avc报错中的tcontext
 class：类别，主要有File,Dir,Socket,SEAndroid还有Binder等       avc报错中的tclass  可以通过ls -l查看文件类型
-perm_set：动作集       读写等操作
+perm_set：动作集       读写等操作    getattr允许调用者查看如日期、时间等属性
+
+allow user_t bin_t: file  read   解释：允许域类型user_t具有对拥有bin_t类型的file客体读的操作 
 
 type  typeattribute  attribute  /system/sepolicy/public/attributes  所有定义的attributes
 	# All types used for property service
@@ -35,7 +58,7 @@ setenforce 0关掉selinux权限后   setprop 可以成功set
 setenforce 1开启selinux权限后 无法set
 
 set_prop ？？  set_prop(cameraserver, system_prop) ==> 赋予cameraserver对system_prop的设置权限
-			添加上述代码后,发现编译失败,查看编译失败log,发现其中配置的property要同system/sepolicy / prebuilts/api/28.0/private/ 要相同,不然会导致编译fail,此处对比同步过去即可.
+			添加上述代码后,发现编译失败,查看编译失败log,发现其中配置的property要同system/sepolicy/prebuilts/api/28.0/private/ 要相同,不然会导致编译fail,此处对比同步过去即可.
 # set_prop(sourcedomain, targetproperty)
 # Allows source domain to set the
 # targetproperty.
@@ -55,3 +78,16 @@ get_prop ?? 读取权限
 define(`get_prop', `
 allow $1 $2:file r_file_perms;
 ')
+
+=======================案例分析======================
+一、添加属性
+查看属性的安全上下文 getprop -Z persist.my.test
+[persist.my.test]: [u:object_r:my_system_prop:s0]
+查看进程的安全上下文：ps -AZ | grep com.android.myapp
+u:r:platform_app:s0:c512,c768 com.android.myapp
+
+通过ls -Zl查看object的selinux属性    -Z可以查看文件或目录的安全上下文
+
+cts版本不能有任何neverallow 只能去掉添加的权限 或者绕开
+国内版本可适当注释掉原生相关neverallow进行规避   注释掉neverallow或者neverallow { domain -untrusted_app_all -platform_app } file_type:file execmod; platform为allow的domain
+
