@@ -1,11 +1,11 @@
-概念:安全增强型(Security-Ehanced Linux) linux的一个安全子系统
+概念:安全增强型(Security-Ehanced Linux) linux的一个安全子系统，最大限度地减小系统中服务进程可访问的资源（最小权限原则）
 以用户身份运行进程，系统上的文件和其他资源都设置权限标签    权限标签：控制哪些用户对哪些文件具有哪些访问权
 不同之处：若要访问文件必须具有普通访问权限和selinux访问权限。因此，即使以超级用户身份运行程序，根据进程以及文件或资源的selinux安全性上下文可能拒绝访问文件或资源
                     普通权限：rwx
 Selinux的三种模式：
-	   1.enforcing：强制模式。违反selinux规则的行为将被阻止并记录到日志中。	
-	   2.permissive：宽容模式。违反 selinux 规则的行为只会记录到日志中，不会阻止。一般为调试用。
-	   3.disabled：关闭selinux。
+	   1.enforcing：强制模式。违反selinux规则的行为将被阻止并记录到日志中。代表 SELinux 运作中，且已经正确的开始限制 domain/type 了；	
+	   2.permissive：宽容模式。违反 selinux 规则的行为只会记录到日志中，不会阻止。一般为调试用。宽容模式：代表 SELinux 运作中，不过仅会有警告讯息并不会实际限制 domain/type 的存取。这种模式可以运来作为 SELinux 的 debug 之用；
+	   3.disabled：关闭selinux。并没有实际运作。
 修改Selinux模式：
 	获取当前的Selinux模式 getenforce
 	setenforce 1    更改selinux为enforcing
@@ -17,7 +17,9 @@ SELinux=enforcing|premissive|disabled
 	它们的对应关系由政策中的规则决定。文件安全上下文由文件创建的位置和创建文件的进程所决定。而且系统有一套默认值，用户也可以对默认值进行设定。需要注意的是，单纯的移动文件操作并不会改变文件的安全上下文。
 安全上下文的构成：
 	安全上下文有四个字段，分别用冒号隔开。形如：system_u:object_r:admin_home_t:s0。分别代表：身份识别、SELinux角色、类型（最重要）、安全级别	
-	一个进程的类型通常被称为域(domain)    	
+	一个进程的类型通常被称为域(domain)  
+域：一个进程的类型称为域类型也可称为域类型  	
+敏感度(s0,s1,...)和范畴(c0,c1,...) =>用于映射真实的机密信息和用户许可	   如果当前进程的安全级别高于客体的安全级别，主体就可以读取客体，如果进程的安全级别低于客体，主体就能写入客体同时给读写客体需要安全级别相等
 	                       
 Selinux权限问题
 TE文件基本规则：

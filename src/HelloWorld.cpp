@@ -10,6 +10,7 @@
 #include "HelloWorld.h"
 #include <string.h>
 #include "Cat_Eat_Rat.h"
+#include "SmartPtr.h"
 #define LOG_TAG "Hello_World"
 using namespace std;
 //char name[MAX_NAME_LENGTH];
@@ -73,5 +74,8 @@ int main(){
 	for(int i = 0;i < 100;i++){
 		printf("i:%d 奇偶性：%s \n",i,dbtest(i));
 	}
+	SmartPtr<int> pointer(new int());   //这个是为什么？？
+	*(pointer.ptr) = 10;
+	pointer.say();
 	return 0;
 }
