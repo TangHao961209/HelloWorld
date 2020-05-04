@@ -1,0 +1,6 @@
+camera的开机初始化流程
+camera的几个进程
+	cameraserver进程
+	provider进程
+通过ps | grep camera 得出android.hardware.camera.provider@2.4-service的pid是最小的也就是说是开机的时候最早启动(对于camera的几个进程)
+camera provider是中间商

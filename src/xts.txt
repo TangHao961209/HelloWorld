@@ -1,0 +1,20 @@
+cts配置环境
+
+
+
+
+gsi规避：                刷入google镜像后，某些属性的值会改变
+			int is_gsi_cts_mode = 0;
+            char property_value[PROPERTY_VALUE_MAX];
+            property_get("ro.build.product", property_value, "0");
+            if(0 == strcmp(property_value, "generic_arm64") ){
+                is_gsi_cts_mode = 1;
+            }else
+                is_gsi_cts_mode = 0;
+            LOGH("is_gsi_cts_mode=%d  property_value=%s ",is_gsi_cts_mode,property_value);
+cts规避：读取属性值
+
+
+its：读取属性值
+
+            

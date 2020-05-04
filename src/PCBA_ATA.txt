@@ -1,1 +1,32 @@
 CAM4 fail 关键字:crc_fail
+
+模组的checksum value
+
+
+Camera_check_crc(pImgBufInfo->RAWImgBufInfo.bufAddr,gCRCValue,pImgBufInfo->RAWImgBufInfo.imgSize,
+                    pImgBufInfo->bufXSizeByte, pImgBufInfo->bufStrideByte))
+
+if ((buf_xsize_byte != 0) && (buf_stride_byte != 0) && (buf_xsize_byte <= buf_stride_byte)) {
+        MUINT32 xpos = 0;
+
+        while (size-- > 0) {
+            if (xpos < buf_xsize_byte) {
+                crc_accum = (crc_accum << 8) ^ ACDK_CRC_Table[(MUINT8)(crc_accum >> 24) ^ (*out_buffer++)];
+            }
+
+            xpos++;
+            if (xpos == buf_stride_byte) {
+                xpos = 0;
+            }
+        }
+    }
+    else {
+        while (size-- > 0) {
+            crc_accum = (crc_accum << 8) ^ ACDK_CRC_Table[(MUINT8)(crc_accum >> 24) ^ (*out_buffer++)];
+        }
+    }  
+    
+数据结构算法:CRC32算法实现原理 
+简而言之，CRC是一个数值。该数值被用于校验数据的正确性。CRC数值简单地说就是通过让你需要做处理的数据除以一个常数而得到的余数。当你得到这个数值后你可以将这个数值附加到你的数据后，当数据被传送到其他地方后，取出原始数据(可能在传送过程中被破坏)与附加的CRC数值，然后将这里的原始数据除以之前那个常数(约定好的)然后得到新的CRC值。比较两个CRC值是否相等即可确认你的数据是否在传送过程中出现错误。 
+  那么，如何让你的数据除以一个常数？方法是对你的数据进行必要的编码处理，逐字节处理成数字。 
+  那么这个常数是什么？你不必关注它是什么，也不需要关注它是如何获得的。当你真的要动手写一个CRC的实现算法时，我可以告诉你，CRC的理论学家会告诉你。不同长度的常数对应着不同的CRC实现算法。当这个常数为32位时，也就是这里所说的CRC32。                        

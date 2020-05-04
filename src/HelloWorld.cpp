@@ -67,6 +67,18 @@ int main2(){
 	return 0;
 }
 
+class Test {
+public:
+    Test() {}
+	~Test() {}
+	void test() { cout << "just for test ...\n";}
+};
+
+inline void swap(int *a,int *b){   //内联函数无法实现交换   //利用指针传递可以实现
+	*a=*a+*b;
+	*b=*a-*b;
+	*a=*a-*b;
+}
 
 int main(){
 	main1();
@@ -74,8 +86,18 @@ int main(){
 	for(int i = 0;i < 100;i++){
 		printf("i:%d 奇偶性：%s \n",i,dbtest(i));
 	}
-	SmartPtr<int> pointer(new int());   //这个是为什么？？
-	*(pointer.ptr) = 10;
+	android::SmartPtr<int> pointer(new int());   //这个是为什么？？   命名空间的作用
+    *(pointer.ptr) = 10;
 	pointer.say();
+
+#if 0
+	android::sp<Test> hehe(new Test());  //构造时直接传入指针
+	hehe.m_ptr->test();
+	*hehe.m_ptr->test();
+#endif
+	int x = 1,y = 2;
+	printf("x = %d,y = %d \n",x,y);
+	swap(&x,&y);
+	printf("x = %d,y = %d \n",x,y);
 	return 0;
 }
